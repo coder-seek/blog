@@ -1,4 +1,4 @@
-# Joi's Blog
+# Kang's Blog
 
 A personal blog built with [Astro](https://astro.build/), deployed on [Cloudflare Pages](https://pages.cloudflare.com/).
 

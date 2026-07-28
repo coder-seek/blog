@@ -1,4 +1,4 @@
-# Joi's Blog
+# Kang's Blog
 
 [Astro](https://astro.build/) で構築された個人ブログ。[Cloudflare Pages](https://pages.cloudflare.com/) にデプロイされています。
 

@@ -1,4 +1,4 @@
-# Joi's Blog
+# Kang's Blog
 
 > **🌐 其他语言 / Other Languages / 他の言語**
 >
