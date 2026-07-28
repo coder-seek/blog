@@ -1,0 +1,81 @@
+<button
+  id="themeToggle"
+  class="theme-toggle"
+  type="button"
+  aria-label="切换主题"
+  title="切换亮色/暗色模式"
+>
+  <span class="toggle-orbit">
+    <span class="icon-sun">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4.5"></circle>
+        <line x1="12" y1="2" x2="12" y2="4.5"></line>
+        <line x1="12" y1="19.5" x2="12" y2="22"></line>
+        <line x1="4.9" y1="4.9" x2="6.7" y2="6.7"></line>
+        <line x1="17.3" y1="17.3" x2="19.1" y2="19.1"></line>
+        <line x1="2" y1="12" x2="4.5" y2="12"></line>
+        <line x1="19.5" y1="12" x2="22" y2="12"></line>
+        <line x1="4.9" y1="19.1" x2="6.7" y2="17.3"></line>
+        <line x1="17.3" y1="6.7" x2="19.1" y2="4.9"></line>
+      </svg>
+    </span>
+    <span class="icon-moon">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </span>
+  </span>
+</button>
+
+<script>
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--hairline);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color var(--transition-fast),
+      color var(--transition-fast),
+      transform 0.5s var(--ease-expo);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+    transform: rotate(40deg);
+  }
+
+  .toggle-orbit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-sun,
+  .icon-moon {
+    display: flex;
+  }
+
+  [data-theme="dark"] .icon-sun { display: flex; }
+  [data-theme="dark"] .icon-moon { display: none; }
+  :root:not([data-theme="dark"]) .icon-sun { display: none; }
+  :root:not([data-theme="dark"]) .icon-moon { display: flex; }
+</style>

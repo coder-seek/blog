@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const photos = [
+  { src: "/assets/images/photography-placeholder-1.jpg", alt: "山景" },
+  { src: "/assets/images/photography-placeholder-2.jpg", alt: "湖面" },
+];
+---
+
+<BaseLayout title="摄影">
+  <Header />
+  <main class="page-content">
+    <section class="page-section">
+      <div class="container-wide">
+        <h1 class="page-title">摄影</h1>
+        <p class="page-desc">镜头里的世界</p>
+        <div class="gallery-grid">
+          {photos.length > 0 ? (
+            photos.map((photo) => (
+              <a href={photo.src} class="gallery-item card" target="_blank">
+                <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" />
+              </a>
+            ))
+          ) : (
+            <p class="empty-hint">暂无照片</p>
+          )}
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-content {
+    padding-top: 72px;
+  }
+
+  .page-section {
+    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--space-xl);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .gallery-item {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--space-5xl) 0;
+  }
+
+  @media (max-width: 768px) {
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+</style>

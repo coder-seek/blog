@@ -1,0 +1,308 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+
+const navItems: { href: string; label: string }[] = [
+  { href: "/", label: "首页" },
+  { href: "/archive", label: "归档" },
+  { href: "/categories", label: "分类" },
+  { href: "/tags", label: "标签" },
+  { href: "/moments", label: "动态" },
+  { href: "/gallery", label: "摄影" },
+  { href: "/friends", label: "友链" },
+  { href: "/guestbook", label: "留言" },
+];
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === "/" ? currentPath === "/" : currentPath.startsWith(href);
+---
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark">拾</span>
+      <span class="logo-text">拾光记</span>
+    </a>
+    <nav class="nav-desktop" aria-label="主导航">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={["nav-link", { "is-active": isActive(item.href) }]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+    <div class="header-actions">
+      <ThemeToggle />
+      <button
+        id="mobileMenuBtn"
+        class="mobile-menu-btn"
+        aria-label="菜单"
+        aria-expanded="false"
+        type="button"
+      >
+        <span class="menu-line"></span>
+        <span class="menu-line"></span>
+      </button>
+    </div>
+  </div>
+  <nav id="mobileNav" class="nav-mobile" aria-label="移动端导航">
+    {navItems.map((item, i) => (
+      <a
+        href={item.href}
+        class="nav-link-mobile"
+        style={`--i: ${i}`}
+      >
+        <span class="nav-mobile-index">{String(i + 1).padStart(2, "0")}</span>
+        {item.label}
+      </a>
+    ))}
+  </nav>
+</header>
+
+<script>
+  // 移动端菜单
+  const btn = document.getElementById("mobileMenuBtn");
+  const nav = document.getElementById("mobileNav");
+  if (btn && nav) {
+    btn.addEventListener("click", () => {
+      const open = nav.classList.toggle("open");
+      btn.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+  }
+
+  // 藏显式导航：下滑隐藏、上滑浮现；滚动后加玻璃态
+  const header = document.getElementById("siteHeader");
+  if (header) {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      header.classList.toggle("is-scrolled", y > 24);
+      if (y > 160 && y > lastY + 4 && !nav?.classList.contains("open")) {
+        header.classList.add("is-hidden");
+      } else if (y < lastY - 4 || y <= 160) {
+        header.classList.remove("is-hidden");
+      }
+      lastY = y;
+      ticking = false;
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(onScroll);
+        }
+      },
+      { passive: true },
+    );
+  }
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    transition:
+      transform 0.5s var(--ease-expo),
+      background 0.4s var(--ease-out),
+      border-color 0.4s var(--ease-out),
+      backdrop-filter 0.4s var(--ease-out);
+    border-bottom: 1px solid transparent;
+    background: transparent;
+  }
+
+  .site-header.is-scrolled {
+    background: var(--card-bg-transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-bottom-color: var(--hairline);
+  }
+
+  .site-header.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .header-inner {
+    max-width: var(--container-wide);
+    margin: 0 auto;
+    padding: 0 var(--page-x-padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-h);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-main);
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--text-main);
+    border-radius: 50%;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    transition: background 0.35s var(--ease-out), color 0.35s var(--ease-out),
+      transform 0.5s var(--ease-expo);
+  }
+
+  .logo:hover .logo-mark {
+    background: var(--text-main);
+    color: var(--page-bg);
+    transform: rotate(-8deg);
+  }
+
+  .logo-text {
+    font-family: var(--font-serif);
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-desktop {
+    display: flex;
+    gap: 1.35rem;
+  }
+
+  .nav-link {
+    position: relative;
+    padding: 0.35rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--text-main);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s var(--ease-expo);
+  }
+
+  .nav-link:hover {
+    color: var(--text-main);
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .nav-link.is-active {
+    color: var(--text-main);
+  }
+
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+    background: var(--accent);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  /* 双线汉堡 */
+  .mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    width: 40px;
+    height: 40px;
+    padding: 0 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .menu-line {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: var(--text-main);
+    transition: transform 0.45s var(--ease-expo);
+  }
+
+  .mobile-menu-btn.is-open .menu-line:first-child {
+    transform: translateY(4.25px) rotate(45deg);
+  }
+
+  .mobile-menu-btn.is-open .menu-line:last-child {
+    transform: translateY(-4.25px) rotate(-45deg);
+  }
+
+  /* 移动端菜单 — 全宽下拉 */
+  .nav-mobile {
+    display: none;
+    flex-direction: column;
+    padding: var(--space-md) var(--page-x-padding) var(--space-2xl);
+    background: var(--card-bg-transparent);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .nav-mobile.open {
+    display: flex;
+  }
+
+  .nav-link-mobile {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding: 0.8rem 0.25rem;
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-light);
+    animation: fadeInUp 0.5s var(--ease-expo) both;
+    animation-delay: calc(var(--i) * 0.045s);
+  }
+
+  .nav-mobile-index {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .nav-link-mobile:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .nav-desktop {
+      display: none;
+    }
+
+    .mobile-menu-btn {
+      display: flex;
+    }
+  }
+</style>

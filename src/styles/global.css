@@ -1,0 +1,513 @@
+/* ============================================================
+   拾光记 — Editorial Design System
+   「纸墨编辑部」：暖纸 / 墨色 / 朱砂 · oklch 色彩系统
+   ============================================================ */
+
+:root {
+  /* ---------- Typography ---------- */
+  --font-display: "Fraunces", "Noto Serif SC", "Source Han Serif SC",
+    "Songti SC", serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia,
+    serif;
+  --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas,
+    ui-monospace, monospace;
+
+  --line-height-body: 1.85;
+  --line-height-heading: 1.25;
+
+  /* ---------- Radius — 编辑部风格：锐利克制 ---------- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+
+  /* ---------- Spacing ---------- */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.25rem;
+  --space-2xl: 1.5rem;
+  --space-3xl: 2rem;
+  --space-4xl: 2.5rem;
+  --space-5xl: 3rem;
+  --widget-gap: 1.5rem;
+
+  /* ---------- Layout ---------- */
+  --container-main: 720px;
+  --container-wide: 72rem;
+  --page-x-padding: 1.25rem;
+  --sidebar-width: 300px;
+  --header-h: 72px;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.2s var(--ease-out);
+  --transition-base: 0.4s var(--ease-out);
+  --transition-slow: 0.7s var(--ease-expo);
+
+  /* ============ Light — 暖纸晨读 ============ */
+  --color-primary: oklch(0.55 0.16 40);
+  --page-bg: oklch(0.965 0.009 90);
+  --card-bg: oklch(0.985 0.006 90);
+  --card-bg-transparent: oklch(0.97 0.008 90 / 0.72);
+  --text-main: oklch(0.25 0.02 60);
+  --text-secondary: oklch(0.45 0.02 60);
+  --text-muted: oklch(0.58 0.015 70);
+  --border: oklch(0.885 0.012 85);
+  --border-card: oklch(0.25 0.02 60 / 0.1);
+  --border-light: oklch(0.25 0.02 60 / 0.06);
+  --hairline: oklch(0.25 0.02 60 / 0.14);
+  --shadow-sm: 0 1px 2px oklch(0.3 0.02 60 / 0.05);
+  --shadow-md: 0 6px 16px oklch(0.3 0.02 60 / 0.07);
+  --shadow-lg: 0 16px 40px oklch(0.3 0.02 60 / 0.1);
+  --shadow-xl: 0 24px 64px oklch(0.3 0.02 60 / 0.14);
+  --accent: oklch(0.55 0.16 40);
+  --accent-hover: oklch(0.47 0.16 40);
+  --accent-soft: oklch(0.93 0.03 55);
+  --code-bg: oklch(0.23 0.016 60);
+  --code-text: oklch(0.92 0.012 85);
+  --code-inline-bg: oklch(0.92 0.02 85);
+  --code-inline-text: oklch(0.5 0.13 40);
+  --tag-bg: oklch(0.93 0.018 85);
+  --tag-text: oklch(0.46 0.05 50);
+  --btn-bg: oklch(0.93 0.015 85);
+  --overlay: oklch(0.2 0.015 60 / 0.55);
+  --grain-opacity: 0.35;
+}
+
+/* ============ Dark — 墨夜灯下 ============ */
+[data-theme="dark"] {
+  --page-bg: oklch(0.185 0.012 65);
+  --card-bg: oklch(0.225 0.013 70);
+  --card-bg-transparent: oklch(0.2 0.013 65 / 0.72);
+  --text-main: oklch(0.93 0.012 85);
+  --text-secondary: oklch(0.72 0.015 80);
+  --text-muted: oklch(0.55 0.012 75);
+  --border: oklch(0.3 0.014 70);
+  --border-card: oklch(0.93 0.012 85 / 0.1);
+  --border-light: oklch(0.93 0.012 85 / 0.06);
+  --hairline: oklch(0.93 0.012 85 / 0.16);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.25);
+  --shadow-md: 0 6px 16px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 16px 40px oklch(0 0 0 / 0.4);
+  --shadow-xl: 0 24px 64px oklch(0 0 0 / 0.5);
+  --accent: oklch(0.75 0.125 55);
+  --accent-hover: oklch(0.82 0.105 60);
+  --accent-soft: oklch(0.27 0.03 55);
+  --code-bg: oklch(0.16 0.012 65);
+  --code-text: oklch(0.9 0.012 85);
+  --code-inline-bg: oklch(0.28 0.018 70);
+  --code-inline-text: oklch(0.78 0.1 55);
+  --tag-bg: oklch(0.29 0.02 70);
+  --tag-text: oklch(0.78 0.055 60);
+  --btn-bg: oklch(0.3 0.018 70);
+  --overlay: oklch(0 0 0 / 0.65);
+  --grain-opacity: 0.5;
+}
+
+/* ========== Reset & Base ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  letter-spacing: 0.01em;
+  color: var(--text-main);
+  background: var(--page-bg);
+  transition: background 0.5s var(--ease-out), color 0.5s var(--ease-out);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-feature-settings: "kern", "liga", "palt";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 纸张颗粒质感 — 极细噪点 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: calc(0.028 * var(--grain-opacity) * 10);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+
+p { margin-bottom: 1rem; }
+
+ul, ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+li { margin-bottom: 0.25rem; }
+
+blockquote {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1.25rem;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-secondary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-family: var(--font-serif);
+}
+
+:not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-inline-bg);
+  color: var(--code-inline-text);
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+pre {
+  margin: 1.25rem 0;
+  padding: 1.1rem 1.25rem;
+  background: var(--code-bg);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  border: 1px solid var(--border-light);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: var(--code-text);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th, td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-weight: 600;
+  background: var(--card-bg);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 2.5rem 0;
+}
+
+::placeholder {
+  color: var(--text-muted);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ========== Focus — 可见且优雅 ========== */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ========== Card base（兼容旧类名，编辑部化） ========== */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base),
+    transform var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--hairline);
+}
+
+.card-glass {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-card);
+}
+
+/* ========== Utility ========== */
+.container {
+  width: 100%;
+  max-width: var(--container-main);
+  margin: 0 auto;
+  padding: 0 var(--page-x-padding);
+}
+
+.container-wide {
+  width: 100%;
+  max-width: var(--container-wide);
+  margin: 0 auto;
+  padding: 0 var(--page-x-padding);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ========== Editorial primitives — 编辑部原语 ========== */
+
+/* 眉标：小号大写间隔字 */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* hairline 分隔线 */
+.hairline {
+  border: none;
+  border-top: 1px solid var(--hairline);
+}
+
+/* 章节大号刊头 */
+.section-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+
+/* 文字链接：下划线生长 */
+.link-grow {
+  position: relative;
+  display: inline-block;
+  color: var(--text-main);
+}
+
+.link-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease-expo);
+}
+
+.link-grow:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ========== Article Typography ========== */
+.post-content-inner > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.8em;
+  font-weight: 600;
+  line-height: 0.82;
+  margin-right: 0.55rem;
+  margin-top: 0.14rem;
+  color: var(--accent);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
+.post-content-inner h2[id],
+.post-content-inner h3[id],
+.post-content-inner h4[id] {
+  scroll-margin-top: 96px;
+}
+
+.post-content-inner h2[id]:hover::after,
+.post-content-inner h3[id]:hover::after,
+.post-content-inner h4[id]:hover::after {
+  content: " #";
+  color: var(--accent);
+  opacity: 0.45;
+}
+
+/* Selection — 朱砂选区 */
+::selection {
+  background: oklch(0.62 0.14 45 / 0.28);
+  color: inherit;
+}
+
+[data-theme="dark"] ::selection {
+  background: oklch(0.72 0.12 55 / 0.32);
+  color: inherit;
+}
+
+/* ========== Motion system — 动效系统 ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(110%) rotate(2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s var(--ease-expo) both;
+}
+
+/* 滚动渐入叙事：js 就绪时先隐藏，进入视口后浮现 */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s var(--ease-expo), transform 0.8s var(--ease-expo);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+html.js .reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 滚动阅读进度条 */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  z-index: 200;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+/* 页面进入转场 */
+@keyframes pageEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+html.js body {
+  animation: pageEnter 0.5s ease both;
+}
+
+/* ========== Reduced motion ========== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

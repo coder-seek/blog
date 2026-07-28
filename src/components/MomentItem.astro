@@ -1,0 +1,47 @@
+---
+import { formatDateCN } from "../utils/date";
+import type { CollectionEntry } from "astro:content";
+
+export interface Props {
+  moment: CollectionEntry<"moments">;
+}
+
+const { moment } = Astro.props;
+const { date } = moment.data;
+const { Content } = await moment.render();
+---
+
+<div class="moment-item">
+  <time datetime={date.toISOString()} class="moment-time">
+    {formatDateCN(date)}
+  </time>
+  <div class="moment-body">
+    <Content />
+  </div>
+</div>
+
+<style>
+  .moment-item {
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .moment-time {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .moment-body {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .moment-body :global(img) {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    margin: var(--space-sm) 0;
+  }
+</style>

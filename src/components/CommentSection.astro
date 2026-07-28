@@ -1,0 +1,182 @@
+---
+/**
+ * Giscus 评论组件 (https://giscus.app)
+ *
+ * 使用前需配置：
+ * 1. 在 GitHub 仓库中启用 Discussions
+ * 2. 安装 Giscus GitHub App: https://github.com/apps/giscus
+ * 3. 访问 https://giscus.app 生成 data-repo-id 和 data-category-id
+ * 4. 将下方 data-repo-id 和 data-category-id 替换为你的值
+ *
+ * 如果 Giscus 未加载，评论区域会自动显示配置提示。
+ */
+
+export interface Props {
+  slug: string;
+  title: string;
+}
+
+const { slug, title } = Astro.props;
+---
+
+<section id="comments" class="post-comments">
+  <div class="post-comments-inner card">
+    <h2 class="comments-title">
+      <span class="comments-title-icon">💬</span>
+      评论
+    </h2>
+    <p class="comments-subtitle">在 GitHub Discussions 上参与讨论</p>
+
+    <div class="giscus-wrapper">
+      <!--
+        ⚠️ 配置说明：
+        将下方 data-repo-id 和 data-category-id
+        替换为你在 https://giscus.app 获取的值
+      -->
+      <div
+        class="giscus"
+        data-repo="coder-seek/blog"
+        data-repo-id="REPO_ID"
+        data-category="Announcements"
+        data-category-id="CATEGORY_ID"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        data-loading="lazy"
+        data-crossorigin="anonymous"
+      ></div>
+    </div>
+
+    <div class="comments-fallback">
+      <p>
+        💡 评论使用 Giscus（基于 GitHub Discussions）驱动。
+        如未正常加载，请确认：
+      </p>
+      <ol>
+        <li>仓库已启用 Discussions</li>
+        <li>已安装 Giscus GitHub App</li>
+        <li>
+          已配置
+          <code>data-repo-id</code> 和
+          <code>data-category-id</code>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const giscusEl = document.querySelector(".giscus");
+    if (!giscusEl) return;
+
+    // 避免重复加载
+    if (giscusEl.querySelector("iframe")) return;
+
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+
+    // 从 data-* 属性读取配置
+    for (const attr of giscusEl.attributes) {
+      if (attr.name.startsWith("data-")) {
+        script.setAttribute(attr.name, attr.value);
+      }
+    }
+
+    script.async = true;
+    script.crossOrigin = "anonymous";
+
+    // Giscus 无 iframe 加载时显示 fallback
+    const fallback = document.querySelector(".comments-fallback");
+    const timeout = setTimeout(() => {
+      if (!giscusEl.querySelector("iframe")) {
+        if (fallback) fallback.style.display = "block";
+      }
+    }, 10000);
+
+    script.onload = () => clearTimeout(timeout);
+    script.onerror = () => {
+      clearTimeout(timeout);
+      if (fallback) fallback.style.display = "block";
+    };
+
+    giscusEl.appendChild(script);
+  })();
+</script>
+
+<style>
+  .post-comments {
+    margin-bottom: var(--space-2xl);
+    scroll-margin-top: 80px;
+  }
+
+  .post-comments-inner {
+    padding: var(--space-2xl);
+  }
+
+  .comments-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    margin-bottom: var(--space-xs);
+    text-align: center;
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  .comments-title-icon {
+    margin-right: 6px;
+  }
+
+  .comments-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .giscus-wrapper {
+    min-height: 120px;
+  }
+
+  /* Fallback — Giscus 未配置或加载失败时显示 */
+  .comments-fallback {
+    display: none;
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    background: var(--accent-soft);
+    border-radius: var(--radius-lg);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .comments-fallback p {
+    margin-bottom: var(--space-sm);
+  }
+
+  .comments-fallback ol {
+    padding-left: 1.2rem;
+  }
+
+  .comments-fallback li {
+    margin-bottom: 0.2rem;
+  }
+
+  .comments-fallback code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--code-inline-bg);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    .post-comments-inner {
+      padding: var(--space-xl);
+    }
+  }
+</style>

@@ -1,0 +1,776 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import CommentSection from "../../components/CommentSection.astro";
+import { formatDateCN, readingTime } from "../../utils/date";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", ({ data }) => !data.draft);
+  const sorted = posts.sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+  );
+
+  return sorted.map((post, index) => ({
+    params: { slug: post.id.replace(/\.md$/, "") },
+    props: {
+      post,
+      prev: sorted[index + 1] ?? null,
+      next: sorted[index - 1] ?? null,
+    },
+  }));
+}
+
+const { post, prev, next } = Astro.props;
+const { title, date, updated, category, tags, cover } = post.data;
+const { Content } = await post.render();
+const wordCount = readingTime(post.body || "");
+const slug = post.id.replace(/\.md$/, "");
+---
+
+<BaseLayout title={title} description={post.data.summary} ogImage={cover}>
+  <!-- 阅读进度条 -->
+  <div id="readingProgress" class="reading-progress" aria-hidden="true"></div>
+
+  <Header />
+
+  <main class="post-page">
+    <article class="post-article">
+      <!-- ========== 文章头部 ========== -->
+      <header class="post-header">
+        <div class="post-header-bg" aria-hidden="true"></div>
+        <div class="post-header-content">
+          <div class="post-meta-top">
+            <a
+              href={`/archive?category=${encodeURIComponent(category)}`}
+              class="post-category-badge"
+            >
+              {category}
+            </a>
+            <span class="post-date-badge">
+              <time datetime={date.toISOString()}>{formatDateCN(date)}</time>
+            </span>
+            <span class="post-reading-badge">{wordCount} 分钟 · {post.body?.length ?? 0} 字</span>
+          </div>
+
+          <h1 class="post-title">{title}</h1>
+
+          {tags.length > 0 && (
+            <div class="post-tags">
+              {tags.map((tag) => (
+                <a href={`/tags/${encodeURIComponent(tag)}`} class="tag-chip"
+                  >#{tag}</a
+                >
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <!-- ========== 封面图 ========== -->
+      {cover && (
+        <div class="post-cover-wrapper">
+          <div class="post-cover">
+            <img
+              src={cover}
+              alt={title}
+              decoding="async"
+              loading="eager"
+              width="1200"
+              height="630"
+            />
+          </div>
+        </div>
+      )}
+
+      <!-- ========== 文章正文 ========== -->
+      <div class="post-content card">
+        <div class="post-content-inner">
+          <Content />
+        </div>
+      </div>
+
+      <!-- ========== 文章尾部信息 ========== -->
+      <footer class="post-footer card">
+        <div class="post-footer-inner">
+          {updated && (
+            <p class="post-updated">
+              <span class="post-footer-icon">📝</span> 最后更新于
+              {formatDateCN(updated)}
+            </p>
+          )}
+          <div class="post-license">
+            <span class="post-footer-icon">©</span> 本作品采用
+            <a
+              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+              target="_blank"
+              rel="noopener"
+            >
+              CC BY-NC-SA 4.0
+            </a>
+            许可协议
+          </div>
+        </div>
+      </footer>
+
+      <!-- ========== 上下篇导航 ========== -->
+      <nav class="post-nav" aria-label="文章导航">
+        {prev ? (
+          <a
+            href={`/posts/${prev.id.replace(/\.md$/, "")}`}
+            class="post-nav-link post-nav-prev"
+          >
+            <span class="post-nav-arrow">←</span>
+            <span class="post-nav-body">
+              <span class="post-nav-label">上一篇</span>
+              <span class="post-nav-title">{prev.data.title}</span>
+            </span>
+          </a>
+        ) : (
+          <div></div>
+        )}
+        {next ? (
+          <a
+            href={`/posts/${next.id.replace(/\.md$/, "")}`}
+            class="post-nav-link post-nav-next"
+          >
+            <span class="post-nav-body">
+              <span class="post-nav-label">下一篇</span>
+              <span class="post-nav-title">{next.data.title}</span>
+            </span>
+            <span class="post-nav-arrow">→</span>
+          </a>
+        ) : (
+          <div></div>
+        )}
+      </nav>
+
+      <!-- ========== 评论区 ========== -->
+      <CommentSection slug={slug} title={title} />
+    </article>
+  </main>
+
+  <!-- 回到顶部 -->
+  <button
+    id="backToTop"
+    class="back-to-top"
+    type="button"
+    aria-label="回到顶部"
+    title="回到顶部"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  // 阅读进度条
+  const progressBar = document.getElementById("readingProgress");
+  if (progressBar) {
+    let ticking = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const scrollTop = window.scrollY;
+            const docHeight =
+              document.documentElement.scrollHeight - window.innerHeight;
+            const progress =
+              docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = progress + "%";
+            ticking = false;
+          });
+          ticking = true;
+        }
+      },
+      { passive: true },
+    );
+  }
+
+  // 回到顶部
+  const backToTop = document.getElementById("backToTop");
+  if (backToTop) {
+    let btnTicking = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!btnTicking) {
+          requestAnimationFrame(() => {
+            backToTop.classList.toggle("visible", window.scrollY > 400);
+            btnTicking = false;
+          });
+          btnTicking = true;
+        }
+      },
+      { passive: true },
+    );
+
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+</script>
+
+<style>
+  /* ========== 阅读进度条 ========== */
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--accent),
+      oklch(0.7 0.18 290 / 0.8)
+    );
+    z-index: 100;
+    width: 0;
+    transition: width 0.05s linear;
+    pointer-events: none;
+    box-shadow: 0 0 6px oklch(0.6 0.14 250 / 0.4);
+  }
+
+  /* ========== 页面布局 ========== */
+  .post-page {
+    padding-top: calc(72px + var(--space-2xl));
+    padding-bottom: var(--space-5xl);
+  }
+
+  .post-article {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 var(--page-x-padding);
+  }
+
+  /* ========== 文章头部 ========== */
+  .post-header {
+    position: relative;
+    text-align: center;
+    padding: var(--space-4xl) 0 var(--space-3xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  .post-header-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      var(--accent-soft) 0%,
+      transparent 70%
+    );
+    opacity: 0.6;
+    pointer-events: none;
+    border-radius: var(--radius-2xl);
+  }
+
+  .post-header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .post-meta-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    font-size: 0.85rem;
+  }
+
+  .post-category-badge {
+    display: inline-flex;
+    padding: 4px 14px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    transition: opacity var(--transition-fast);
+  }
+
+  .post-category-badge:hover {
+    opacity: 0.85;
+    color: #fff;
+  }
+
+  .post-date-badge,
+  .post-reading-badge {
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .post-date-badge::before,
+  .post-reading-badge::before {
+    content: "·";
+    margin-right: 4px;
+    font-weight: 700;
+    color: var(--border);
+  }
+
+  .post-title {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    line-height: 1.3;
+    margin-bottom: var(--space-lg);
+    color: var(--text-main);
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+  }
+
+  .tag-chip {
+    display: inline-block;
+    font-size: 0.8rem;
+    padding: 3px 12px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+
+  .tag-chip:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ========== 封面图 ========== */
+  .post-cover-wrapper {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .post-cover {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: box-shadow var(--transition-base);
+  }
+
+  .post-cover:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .post-cover img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ========== 文章正文卡片 ========== */
+  .post-content {
+    margin-bottom: var(--space-2xl);
+    overflow: hidden;
+  }
+
+  .post-content-inner {
+    padding: var(--space-3xl) var(--space-3xl);
+  }
+
+  /* 正文排版 */
+  .post-content-inner :global(p) {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    margin-bottom: var(--space-lg);
+    color: var(--text-main);
+  }
+
+  .post-content-inner :global(strong) {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .post-content-inner :global(em) {
+    font-style: italic;
+  }
+
+  .post-content-inner :global(h2) {
+    font-family: var(--font-serif);
+    font-size: 1.55rem;
+    margin-top: var(--space-4xl);
+    margin-bottom: var(--space-lg);
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-soft);
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  .post-content-inner :global(h3) {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    margin-top: var(--space-3xl);
+    margin-bottom: var(--space-md);
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  .post-content-inner :global(h4) {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-sm);
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  /* 列表 */
+  .post-content-inner :global(ul),
+  .post-content-inner :global(ol) {
+    margin-bottom: var(--space-lg);
+    padding-left: 1.8rem;
+  }
+
+  .post-content-inner :global(li) {
+    margin-bottom: 0.4rem;
+    line-height: 1.75;
+    color: var(--text-main);
+  }
+
+  .post-content-inner :global(li > ul),
+  .post-content-inner :global(li > ol) {
+    margin-bottom: 0;
+    margin-top: 0.25rem;
+  }
+
+  /* 引用 */
+  .post-content-inner :global(blockquote) {
+    margin: var(--space-2xl) 0;
+    padding: var(--space-lg) var(--space-xl);
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--text-secondary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-style: italic;
+    position: relative;
+  }
+
+  .post-content-inner :global(blockquote)::before {
+    content: "\201C";
+    position: absolute;
+    top: -0.2rem;
+    left: 0.6rem;
+    font-size: 3rem;
+    color: var(--accent);
+    font-family: var(--font-serif);
+    opacity: 0.25;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .post-content-inner :global(blockquote p) {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-content-inner :global(blockquote p:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* 图片 */
+  .post-content-inner :global(img) {
+    margin: var(--space-2xl) auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* 分割线 */
+  .post-content-inner :global(hr) {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--border),
+      transparent
+    );
+    margin: var(--space-4xl) 0;
+  }
+
+  /* 代码块 */
+  .post-content-inner :global(pre) {
+    margin: var(--space-2xl) 0;
+    padding: var(--space-xl);
+    background: var(--code-bg);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    position: relative;
+    border: 1px solid var(--border-card);
+  }
+
+  .post-content-inner :global(pre code) {
+    background: none;
+    padding: 0;
+    color: var(--code-text);
+    font-size: inherit;
+    font-family: var(--font-mono);
+  }
+
+  /* 行内代码 */
+  .post-content-inner :global(:not(pre) > code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--code-inline-bg);
+    color: var(--code-inline-text);
+    padding: 0.2em 0.45em;
+    border-radius: 4px;
+    word-break: break-word;
+  }
+
+  /* 表格 */
+  .post-content-inner :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-2xl) 0;
+    font-size: 0.925rem;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .post-content-inner :global(th),
+  .post-content-inner :global(td) {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-content-inner :global(th) {
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--text-main);
+  }
+
+  .post-content-inner :global(tr:last-child td) {
+    border-bottom: none;
+  }
+
+  .post-content-inner :global(tr:hover td) {
+    background: var(--accent-soft);
+  }
+
+  /* 正文链接 */
+  .post-content-inner :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    transition: all var(--transition-fast);
+  }
+
+  .post-content-inner :global(a:hover) {
+    color: var(--accent-hover);
+    text-decoration-thickness: 2px;
+  }
+
+  /* ========== 文章尾部 ========== */
+  .post-footer {
+    margin-bottom: var(--space-2xl);
+    text-align: center;
+  }
+
+  .post-footer-inner {
+    padding: var(--space-lg) var(--space-xl);
+  }
+
+  .post-updated {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .post-footer-icon {
+    margin-right: 4px;
+  }
+
+  .post-license {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .post-license a {
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ========== 上下篇导航 ========== */
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .post-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    background: var(--card-bg);
+    border-radius: var(--radius-xl);
+    border: 0.8px solid var(--border-card);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    transition: transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .post-nav-link:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .post-nav-prev {
+    text-align: left;
+  }
+
+  .post-nav-next {
+    text-align: right;
+    flex-direction: row-reverse;
+  }
+
+  .post-nav-arrow {
+    font-size: 1.3rem;
+    color: var(--accent);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .post-nav-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .post-nav-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .post-nav-title {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color var(--transition-fast);
+  }
+
+  .post-nav-link:hover .post-nav-title {
+    color: var(--accent);
+  }
+
+  /* ========== 回到顶部 ========== */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity var(--transition-base), transform var(--transition-base),
+      background var(--transition-fast), color var(--transition-fast),
+      box-shadow var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.8px solid var(--border-card);
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .back-to-top:hover {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+
+  /* ========== 响应式 ========== */
+  @media (max-width: 768px) {
+    .post-page {
+      padding-top: calc(72px + var(--space-md));
+    }
+
+    .post-header {
+      padding: var(--space-2xl) 0 var(--space-2xl);
+    }
+
+    .post-title {
+      font-size: 1.6rem;
+    }
+
+    .post-content-inner {
+      padding: var(--space-xl);
+      font-size: 1rem;
+    }
+
+    .post-content-inner :global(p) {
+      font-size: 1rem;
+    }
+
+    .post-content-inner :global(h2) {
+      font-size: 1.35rem;
+    }
+
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .back-to-top {
+      bottom: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .post-title {
+      font-size: 1.35rem;
+    }
+
+    .post-content-inner {
+      padding: var(--space-lg);
+    }
+  }
+</style>

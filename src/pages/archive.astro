@@ -1,0 +1,109 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import PostCard from "../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const categoryFilter = Astro.url.searchParams.get("category");
+
+const posts = await getCollection("posts", ({ data }) => {
+  if (data.draft) return false;
+  if (categoryFilter && data.category !== categoryFilter) return false;
+  return true;
+});
+
+const sortedPosts = posts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const groups: Record<string, typeof sortedPosts> = {};
+sortedPosts.forEach((post) => {
+  const year = post.data.date.getFullYear().toString();
+  if (!groups[year]) groups[year] = [];
+  groups[year].push(post);
+});
+---
+
+<BaseLayout title="归档">
+  <Header />
+  <main class="page-content">
+    <section class="page-section">
+      <div class="container">
+        <h1 class="page-title">归档</h1>
+        {categoryFilter && (
+          <p class="filter-hint">
+            筛选：{categoryFilter}
+            <a href="/archive" class="clear-filter">清除</a>
+          </p>
+        )}
+        {Object.keys(groups)
+          .sort((a, b) => Number(b) - Number(a))
+          .map((year) => (
+            <div class="archive-year">
+              <h2 class="year-title">{year}</h2>
+              <div class="year-posts">
+                {groups[year].map((post) => (
+                  <PostCard post={post} layout="list" />
+                ))}
+              </div>
+            </div>
+          ))}
+        {sortedPosts.length === 0 && (
+          <p class="empty-hint">暂无文章</p>
+        )}
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-content {
+    padding-top: 72px;
+  }
+
+  .page-section {
+    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xl);
+  }
+
+  .filter-hint {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 0.8px solid var(--border-card);
+  }
+
+  .clear-filter {
+    margin-left: var(--space-md);
+    font-size: 0.85rem;
+  }
+
+  .archive-year {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .year-title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: var(--space-lg);
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--space-5xl) 0;
+  }
+</style>

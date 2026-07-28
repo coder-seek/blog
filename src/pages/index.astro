@@ -1,0 +1,244 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import HeroProfile from "../components/HeroProfile.astro";
+import PostCard from "../components/PostCard.astro";
+import MomentItem from "../components/MomentItem.astro";
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("posts", ({ data }) => !data.draft);
+const sortedPosts = posts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const moments = await getCollection("moments");
+const sortedMoments = moments
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const categories = [...new Set(posts.map((p) => p.data.category))];
+const allTags = posts.flatMap((p) => p.data.tags);
+const tagCounts: Record<string, number> = {};
+allTags.forEach((t) => {
+  tagCounts[t] = (tagCounts[t] || 0) + 1;
+});
+
+const siteInfo = {
+  buildPlatform: "Cloudflare Pages",
+  postsCount: sortedPosts.length,
+  categoriesCount: categories.length,
+  tagsCount: Object.keys(tagCounts).length,
+};
+---
+
+<BaseLayout>
+  <Header />
+  <main class="main-content">
+    <HeroProfile />
+
+    <section class="home-section">
+      <div class="container-wide">
+        <div class="section-head reveal">
+          <p class="eyebrow">Selected Writing</p>
+          <h2 class="section-heading">最新文章</h2>
+        </div>
+
+        <div class="home-grid">
+          <div class="home-main">
+            {sortedPosts.map((post, i) => (
+              <div class="reveal" style={`--reveal-delay: ${Math.min(i, 5) * 0.06}s`}>
+                <PostCard post={post} layout="list" index={i} />
+              </div>
+            ))}
+            {sortedPosts.length === 0 && (
+              <p class="empty-hint">还没有文章，开始写第一篇吧。</p>
+            )}
+          </div>
+
+          <aside class="home-sidebar">
+            <div class="sidebar-block reveal">
+              <p class="eyebrow sidebar-eyebrow">Categories · 分类</p>
+              <div class="sidebar-categories">
+                {categories.map((cat) => {
+                  const count = posts.filter((p) => p.data.category === cat).length;
+                  return (
+                    <a href={`/archive?category=${encodeURIComponent(cat)}`} class="sidebar-cat-item">
+                      <span class="cat-name">{cat}</span>
+                      <span class="cat-line" aria-hidden="true"></span>
+                      <span class="cat-count">{count}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+
+            {sortedMoments.length > 0 && (
+              <div class="sidebar-block reveal" style="--reveal-delay: 0.08s">
+                <p class="eyebrow sidebar-eyebrow">
+                  <a href="/moments" class="sidebar-eyebrow-link">Moments · 最新动态</a>
+                </p>
+                <div class="sidebar-moments">
+                  {sortedMoments.map((m) => (
+                    <MomentItem moment={m} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div class="sidebar-block reveal" style="--reveal-delay: 0.16s">
+              <p class="eyebrow sidebar-eyebrow">Colophon · 站点</p>
+              <div class="site-info-list">
+                <div class="site-info-row">
+                  <span>文章</span><span class="site-info-num">{siteInfo.postsCount}</span>
+                </div>
+                <div class="site-info-row">
+                  <span>分类</span><span class="site-info-num">{siteInfo.categoriesCount}</span>
+                </div>
+                <div class="site-info-row">
+                  <span>标签</span><span class="site-info-num">{siteInfo.tagsCount}</span>
+                </div>
+                <div class="site-info-row">
+                  <span>托管</span><span class="site-info-num">{siteInfo.buildPlatform}</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .home-section {
+    padding: clamp(3rem, 8vh, 6rem) 0 var(--space-5xl);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xl);
+    margin-bottom: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .section-head .eyebrow {
+    flex-shrink: 0;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-width);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--space-5xl) 0;
+  }
+
+  /* ===== 侧栏 — 极简编目 ===== */
+  .home-sidebar {
+    position: sticky;
+    top: calc(var(--header-h) + 1.5rem);
+  }
+
+  .sidebar-block {
+    padding: var(--space-xl) 0;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .sidebar-block:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .sidebar-eyebrow {
+    margin-bottom: var(--space-lg);
+  }
+
+  .sidebar-eyebrow-link {
+    color: inherit;
+    letter-spacing: inherit;
+  }
+
+  .sidebar-eyebrow-link:hover {
+    color: var(--accent);
+  }
+
+  .sidebar-categories {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-cat-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding: 0.45rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+  }
+
+  .sidebar-cat-item:hover {
+    color: var(--text-main);
+  }
+
+  .cat-name {
+    flex-shrink: 0;
+  }
+
+  .cat-line {
+    flex: 1;
+    border-bottom: 1px dotted var(--hairline);
+    transform: translateY(-3px);
+  }
+
+  .cat-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .sidebar-cat-item:hover .cat-count {
+    color: var(--accent);
+  }
+
+  .sidebar-moments :global(.moment-item:last-child) {
+    border-bottom: none;
+  }
+
+  .site-info-list {
+    font-size: 0.875rem;
+  }
+
+  .site-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.4rem 0;
+    color: var(--text-secondary);
+  }
+
+  .site-info-num {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-main);
+  }
+
+  @media (max-width: 1024px) {
+    .home-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-sidebar {
+      position: static;
+      order: 2;
+      margin-top: var(--space-3xl);
+    }
+  }
+</style>
