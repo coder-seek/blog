@@ -10,6 +10,11 @@ summary: 关于坚持写作的几个理由和个人体会。
 
 ## 1. 思考的整理
 
+
+![alt text](image/why-blogging/joi.jpg)
+
+
+
 写作是最好的思考方式。当你试图把一件事写清楚时，你会发现自己的理解还不够——这就是深度学习的过程。
 
 > "If you can't explain it simply, you don't understand it well enough."
