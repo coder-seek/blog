@@ -2,13 +2,16 @@
 /**
  * Giscus 评论组件 (https://giscus.app)
  *
- * 使用前需配置：
- * 1. 在 GitHub 仓库中启用 Discussions
- * 2. 安装 Giscus GitHub App: https://github.com/apps/giscus
- * 3. 访问 https://giscus.app 生成 data-repo-id 和 data-category-id
- * 4. 将下方 data-repo-id 和 data-category-id 替换为你的值
+ * 已配置完成，依赖三项外部设置：
+ * 1. 仓库 coder-seek/blog 已启用 Discussions
+ * 2. 已安装 giscus GitHub App（仅授权该仓库）
+ * 3. 仓库为公开仓库 —— giscus 明确要求，私有仓库访客看不到讨论
  *
- * 如果 Giscus 未加载，评论区域会自动显示配置提示。
+ * 下面的 data-repo-id / data-category-id 由 giscus.app 生成，是 GitHub 的内部
+ * 节点 ID 而非名称。换仓库或改讨论分类后这两个值会失效，需回 giscus.app 重新生成。
+ * 映射方式为 pathname：讨论按页面路径关联，不需要改域名。
+ *
+ * Giscus 未加载时（例如 giscus.app 不可达）自动显示兜底提示。
  */
 
 export interface Props {
@@ -28,17 +31,12 @@ const { slug, title } = Astro.props;
     <p class="comments-subtitle">在 GitHub Discussions 上参与讨论</p>
 
     <div class="giscus-wrapper">
-      <!--
-        ⚠️ 配置说明：
-        将下方 data-repo-id 和 data-category-id
-        替换为你在 https://giscus.app 获取的值
-      -->
       <div
         class="giscus"
         data-repo="coder-seek/blog"
-        data-repo-id="REPO_ID"
+        data-repo-id="R_kgDOTer7HA"
         data-category="Announcements"
-        data-category-id="CATEGORY_ID"
+        data-category-id="DIC_kwDOTer7HM4DHOt-"
         data-mapping="pathname"
         data-strict="0"
         data-reactions-enabled="1"
@@ -53,18 +51,17 @@ const { slug, title } = Astro.props;
 
     <div class="comments-fallback">
       <p>
-        💡 评论使用 Giscus（基于 GitHub Discussions）驱动。
-        如未正常加载，请确认：
+        💡 评论由 Giscus（基于 GitHub Discussions）驱动，需要能访问
+        <code>giscus.app</code> 与 GitHub。
       </p>
-      <ol>
-        <li>仓库已启用 Discussions</li>
-        <li>已安装 Giscus GitHub App</li>
-        <li>
-          已配置
-          <code>data-repo-id</code> 和
-          <code>data-category-id</code>
-        </li>
-      </ol>
+      <p>
+        如果评论框一直加载不出来，多半是网络原因。你可以直接
+        <a
+          href="https://github.com/coder-seek/blog/discussions"
+          target="_blank"
+          rel="noopener">到 GitHub Discussions 参与讨论</a
+        >。
+      </p>
     </div>
   </div>
 </section>
