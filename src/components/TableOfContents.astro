@@ -175,5 +175,26 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
       padding: var(--space-sm) 0 var(--space-md);
       border-bottom: 1px solid var(--hairline);
     }
+
+    /* 展开动画：靠 interpolate-size（html 上已 opt-in）把 block-size 插值到 auto，
+       不再需要 max-height 之类的硬编码高度。仅 Chromium 支持，其余浏览器整块忽略，
+       退化为瞬时展开 */
+    @supports (interpolate-size: allow-keywords) {
+      .toc-details::details-content {
+        block-size: 0;
+        overflow: hidden;
+        transition: block-size 0.32s var(--ease-out);
+      }
+
+      .toc-details[open]::details-content {
+        block-size: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .toc-details::details-content {
+        transition: none;
+      }
+    }
   }
 </style>

@@ -55,6 +55,12 @@
   --z-header: 100;
   --z-progress: 101;
 
+  /* ---------- Scrollbar ---------- */
+  /* 标准 scrollbar-color 需要成对的 thumb/track 变量：--hairline 随主题切换，
+     所以这两个变量不必在深色主题里重复声明 */
+  --scrollbar-thumb: var(--hairline);
+  --scrollbar-track: transparent;
+
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -135,6 +141,15 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* 标准滚动条 API。macOS 的原生 overlay 滚动条默认忽略自定义颜色，
+     必须同时给出 scrollbar-width 才会渲染；scrollbar-gutter 避免内容因滚动条出现而横向跳动 */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  /* 允许 block-size / inline-size 插值到 auto、max-content 等内在关键字。
+     默认是 numeric-only，必须显式 opt-in 才会生效；
+     不支持的浏览器忽略该声明，只影响展开动画是否平滑，不影响功能 */
+  interpolate-size: allow-keywords;
 }
 
 body {
@@ -188,6 +203,9 @@ h1, h2, h3, h4, h5, h6 {
   line-height: var(--line-height-heading);
   color: var(--text-main);
   letter-spacing: 0.02em;
+  /* 标题是短文本块：均衡换行让多行标题长度对称。
+     浏览器对 balance 有 6~10 行上限，超出会自动退回普通换行 */
+  text-wrap: balance;
 }
 
 h1 { font-size: 2rem; }
@@ -195,14 +213,21 @@ h2 { font-size: 1.5rem; }
 h3 { font-size: 1.25rem; }
 h4 { font-size: 1.1rem; }
 
-p { margin-bottom: 1rem; }
+p {
+  margin-bottom: 1rem;
+  /* 长段落启用 pretty 换行，避免末行只剩一个孤字 */
+  text-wrap: pretty;
+}
 
 ul, ol {
   padding-left: 1.5rem;
   margin-bottom: 1rem;
 }
 
-li { margin-bottom: 0.25rem; }
+li {
+  margin-bottom: 0.25rem;
+  text-wrap: pretty;
+}
 
 blockquote {
   margin: 1.25rem 0;
@@ -212,6 +237,7 @@ blockquote {
   color: var(--text-secondary);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   font-family: var(--font-serif);
+  text-wrap: pretty;
 }
 
 :not(pre) > code {
@@ -404,22 +430,35 @@ button {
 }
 
 /* ========== Scrollbar ========== */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* 标准属性优先；旧版 WebKit/Blink 用 ::-webkit-scrollbar 兜底。
+   兜底必须包在 @supports not 里，否则两套规则会在同时支持两者的浏览器里打架。
+   注意：不要给 scrollbar-color 加 transition —— WebKit 会因此抖动。 */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--hairline);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+/* 高对比度偏好：低饱和的 hairline 对这类用户不可见，改用极强对比 */
+@media (prefers-contrast: more) {
+  :root {
+    --scrollbar-thumb: CanvasText;
+    --scrollbar-track: Canvas;
+  }
 }
 
 /* ========== Article Typography ========== */
@@ -523,6 +562,23 @@ html.js .reveal.is-visible {
 
 html.js body {
   animation: pageEnter 0.5s ease both;
+}
+
+/* ========== 跨文档视图转场 ========== */
+/* 纯 CSS，不需要客户端路由：只有源页面与目标页面同时 opt-in 才会触发。
+   包在 no-preference 里，让减少动态效果的用户直接拿到瞬时跳转。
+   未支持的浏览器（Firefox）忽略整条规则，行为不变 —— 渐进增强 */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* 浏览器已接管页面切换时，关掉 body 的入场淡入，否则会叠加成双重淡入。
+   .vt 由 BaseLayout 用 'onpagereveal' in window 精确探测后挂上，
+   比用 view-transition-name 的 @supports 探测更准（后者不含跨文档支持） */
+html.vt.js body {
+  animation: none;
 }
 
 /* ========== Reduced motion ========== */

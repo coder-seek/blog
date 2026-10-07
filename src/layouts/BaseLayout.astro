@@ -47,9 +47,50 @@ const {
         if (saved === "dark" || (!saved && prefersDark)) {
           document.documentElement.setAttribute("data-theme", "dark");
         }
+        // 跨文档视图转场探测（'onpagereveal' 是跨文档支持的最准信号）。
+        // 命中时用 .vt 关掉 body 的入场淡入，否则会和浏览器转场叠成双重淡入
+        if ("onpagereveal" in window) {
+          document.documentElement.classList.add("vt");
+        }
         // js 标记 — 仅在 JS 可用时启用滚动渐入（无 JS 环境内容始终可见）
         document.documentElement.classList.add("js");
       })();
+    </script>
+
+    <!--
+      推测性预加载（Speculation Rules API）：静态站点最划算的一档优化。
+      prefetch 用 moderate（悬停片刻后触发），prerender 用 conservative（指针按下时触发），
+      两者都等到用户真实意图出现才动作，不会无谓占用带宽。
+      排除 rss.xml 与 /assets/*：它们不是 HTML 文档，预取没有意义。
+      未支持的浏览器（Firefox/Safari）直接忽略，属于纯渐进增强。
+    -->
+    <script type="speculationrules" is:inline>
+      {
+        "prefetch": [
+          {
+            "where": {
+              "and": [
+                { "href_matches": "/*" },
+                { "not": { "href_matches": "/rss.xml" } },
+                { "not": { "href_matches": "/assets/*" } }
+              ]
+            },
+            "eagerness": "moderate"
+          }
+        ],
+        "prerender": [
+          {
+            "where": {
+              "and": [
+                { "href_matches": "/*" },
+                { "not": { "href_matches": "/rss.xml" } },
+                { "not": { "href_matches": "/assets/*" } }
+              ]
+            },
+            "eagerness": "conservative"
+          }
+        ]
+      }
     </script>
   </head>
   <body>

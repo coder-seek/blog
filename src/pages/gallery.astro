@@ -7,6 +7,8 @@ const photos = [
   {
     src: "/assets/images/photography-placeholder-1.jpg",
     alt: "层叠山脊在晨雾中延伸",
+    // 首图落在首屏内，是本页唯一的 LCP 候选图
+    priority: true,
   },
   {
     src: "/assets/images/photography-placeholder-2.jpg",
@@ -31,7 +33,8 @@ const photos = [
                   alt={photo.alt}
                   width="1600"
                   height="1200"
-                  loading="lazy"
+                  fetchpriority={photo.priority ? "high" : undefined}
+                  loading={photo.priority ? undefined : "lazy"}
                   decoding="async"
                 />
               </a>
