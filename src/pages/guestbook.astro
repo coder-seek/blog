@@ -6,47 +6,20 @@ import Footer from "../components/Footer.astro";
 
 <BaseLayout title="留言">
   <Header />
-  <main class="page-content">
-    <section class="page-section">
-      <div class="container">
-        <div class="page-card card" style="padding: var(--space-2xl);">
-          <h1 class="page-title">留言</h1>
-          <p class="page-desc">欢迎留下足迹</p>
-          <div class="guestbook-placeholder">
-            <p>留言功能暂未开启。你可以通过邮件或社交媒体联系我。</p>
-            <p class="hint">后续可接入 Giscus、Waline 等评论系统。</p>
-          </div>
-        </div>
+  <main class="page-shell">
+    <div class="container">
+      <h1 class="page-title">留言</h1>
+      <p class="page-lede">欢迎留下足迹。</p>
+      <div class="guestbook-placeholder">
+        <p>留言功能暂未开启。你可以通过邮件或社交媒体联系我。</p>
+        <p class="hint">后续可接入 Giscus、Waline 等评论系统。</p>
       </div>
-    </section>
+    </div>
   </main>
   <Footer />
 </BaseLayout>
 
 <style>
-  .page-content {
-    padding-top: 72px;
-  }
-
-  .page-section {
-    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
-  }
-
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: var(--space-xs);
-  }
-
-  .page-desc {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-lg);
-    border-bottom: 1px solid var(--border);
-  }
-
   .guestbook-placeholder {
     padding: var(--space-3xl) var(--space-xl);
     background: var(--accent-soft);

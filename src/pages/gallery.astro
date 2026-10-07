@@ -4,57 +4,49 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
 const photos = [
-  { src: "/assets/images/photography-placeholder-1.jpg", alt: "山景" },
-  { src: "/assets/images/photography-placeholder-2.jpg", alt: "湖面" },
+  {
+    src: "/assets/images/photography-placeholder-1.jpg",
+    alt: "层叠山脊在晨雾中延伸",
+  },
+  {
+    src: "/assets/images/photography-placeholder-2.jpg",
+    alt: "清晨静谧的湖面倒影",
+  },
 ];
 ---
 
 <BaseLayout title="摄影">
   <Header />
-  <main class="page-content">
-    <section class="page-section">
-      <div class="container-wide">
-        <h1 class="page-title">摄影</h1>
-        <p class="page-desc">镜头里的世界</p>
-        <div class="gallery-grid">
-          {photos.length > 0 ? (
-            photos.map((photo) => (
-              <a href={photo.src} class="gallery-item card" target="_blank">
-                <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" />
+  <main class="page-shell">
+    <div class="container-wide">
+      <h1 class="page-title">摄影</h1>
+      <p class="page-lede">镜头里的世界，共 {photos.length} 张。</p>
+      {
+        photos.length > 0 ? (
+          <div class="gallery-grid">
+            {photos.map((photo) => (
+              <a href={photo.src} class="gallery-item card" target="_blank" rel="noopener">
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  width="1600"
+                  height="1200"
+                  loading="lazy"
+                  decoding="async"
+                />
               </a>
-            ))
-          ) : (
-            <p class="empty-hint">暂无照片</p>
-          )}
-        </div>
-      </div>
-    </section>
+            ))}
+          </div>
+        ) : (
+          <p class="empty-hint">暂无照片</p>
+        )
+      }
+    </div>
   </main>
   <Footer />
 </BaseLayout>
 
 <style>
-  .page-content {
-    padding-top: 72px;
-  }
-
-  .page-section {
-    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
-  }
-
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: var(--space-xs);
-  }
-
-  .page-desc {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: var(--space-xl);
-  }
-
   .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -62,6 +54,7 @@ const photos = [
   }
 
   .gallery-item {
+    display: block;
     border-radius: var(--radius-xl);
     overflow: hidden;
     aspect-ratio: 4 / 3;
@@ -81,7 +74,7 @@ const photos = [
   .empty-hint {
     text-align: center;
     color: var(--text-muted);
-    padding: var(--space-5xl) 0;
+    padding: var(--space-3xl) 0;
   }
 
   @media (max-width: 768px) {

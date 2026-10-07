@@ -44,6 +44,17 @@
   --sidebar-width: 300px;
   --header-h: 72px;
 
+  /* ---------- Reading measure ---------- */
+  --prose-width: 688px;
+  --prose-max: 44rem;
+  --toc-width: 240px;
+  --toc-gap: 64px;
+
+  /* ---------- Layers ---------- */
+  --z-grain: 50;
+  --z-header: 100;
+  --z-progress: 101;
+
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -58,7 +69,7 @@
   --card-bg-transparent: oklch(0.97 0.008 90 / 0.72);
   --text-main: oklch(0.25 0.02 60);
   --text-secondary: oklch(0.45 0.02 60);
-  --text-muted: oklch(0.58 0.015 70);
+  --text-muted: oklch(0.52 0.015 70); /* WCAG AA 4.5:1 达标（原 0.58，约 3.87:1） */
   --border: oklch(0.885 0.012 85);
   --border-card: oklch(0.25 0.02 60 / 0.1);
   --border-light: oklch(0.25 0.02 60 / 0.06);
@@ -88,7 +99,7 @@
   --card-bg-transparent: oklch(0.2 0.013 65 / 0.72);
   --text-main: oklch(0.93 0.012 85);
   --text-secondary: oklch(0.72 0.015 80);
-  --text-muted: oklch(0.55 0.012 75);
+  --text-muted: oklch(0.66 0.012 75); /* WCAG AA 4.5:1 达标（原 0.55，约 3.84:1） */
   --border: oklch(0.3 0.014 70);
   --border-card: oklch(0.93 0.012 85 / 0.1);
   --border-light: oklch(0.93 0.012 85 / 0.06);
@@ -148,7 +159,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: var(--z-grain);
   pointer-events: none;
   opacity: calc(0.028 * var(--grain-opacity) * 10);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
@@ -306,6 +317,29 @@ button {
   padding: 0 var(--page-x-padding);
 }
 
+/* ========== Page shell — 全站统一骨架 ========== */
+/* 所有内页共用一个顶部留白公式，替代原先散落的 padding-top: 72px */
+.page-shell {
+  padding-top: calc(var(--header-h) + var(--space-3xl));
+  padding-bottom: var(--space-5xl);
+}
+
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: var(--space-md);
+}
+
+.page-lede {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -389,7 +423,8 @@ button {
 }
 
 /* ========== Article Typography ========== */
-.post-content-inner > p:first-of-type::first-letter {
+/* 首字下沉仅西文适用：中文方块字做下沉会破坏行首节奏 */
+html[lang^="en"] .post-content-inner > p:first-of-type::first-letter {
   float: left;
   font-size: 3.8em;
   font-weight: 600;
@@ -449,11 +484,6 @@ button {
   }
 }
 
-@keyframes marqueeScroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
 .animate-in {
   animation: fadeInUp 0.6s var(--ease-expo) both;
 }
@@ -478,7 +508,7 @@ html.js .reveal.is-visible {
   left: 0;
   height: 2px;
   width: 100%;
-  z-index: 200;
+  z-index: var(--z-progress);
   background: var(--accent);
   transform-origin: left;
   transform: scaleX(0);

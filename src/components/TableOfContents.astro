@@ -1,0 +1,179 @@
+---
+/**
+ * 文章目录
+ *
+ * 数据来自 post.render() 的 headings，锚点由 Astro 自动生成，
+ * scroll-margin-top 已在 global.css 中设置。
+ *
+ * ≥1200px：右侧 sticky 栏，当前小节高亮
+ * <1200px：折叠为正文上方的 <details>，默认收起，不挤占首屏
+ */
+
+export interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length >= 2 && (
+    <aside class="toc" aria-label="文章目录">
+      <details class="toc-details" open>
+        <summary class="toc-summary">目录</summary>
+        <nav class="toc-nav">
+          <ol class="toc-list">
+            {items.map((h) => (
+              <li class={`toc-item toc-depth-${h.depth}`}>
+                <a href={`#${h.slug}`} class="toc-link">
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+    </aside>
+  )
+}
+
+<script>
+  const toc = document.querySelector(".toc");
+  const details = toc?.querySelector("details");
+
+  // 折叠状态必须跟随断点，而不是只在加载时判定一次：
+  // 窄屏收起（不占首屏），宽屏展开（右侧 sticky 栏依赖列表可见，否则整列空白）
+  const tocMq = window.matchMedia("(max-width: 1199px)");
+  const syncTocOpen = () => {
+    if (details) details.open = !tocMq.matches;
+  };
+  syncTocOpen();
+  tocMq.addEventListener("change", syncTocOpen);
+
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".toc-link"));
+  const targets = links
+    .map((link) => {
+      const id = link.getAttribute("href")?.slice(1);
+      return id ? document.getElementById(id) : null;
+    })
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (targets.length > 0) {
+    const HEADER_OFFSET = 120;
+    let ticking = false;
+
+    const setCurrent = () => {
+      let current = -1;
+      targets.forEach((el, i) => {
+        if (el.getBoundingClientRect().top <= HEADER_OFFSET) current = i;
+      });
+      links.forEach((link, i) => {
+        const active = i === current;
+        link.classList.toggle("is-current", active);
+        if (active) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+      ticking = false;
+    };
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(setCurrent);
+        }
+      },
+      { passive: true },
+    );
+
+    setCurrent();
+  }
+</script>
+
+<style>
+  .toc {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-2xl));
+  }
+
+  /* 桌面端不需要折叠交互，隐藏 summary 只留列表 */
+  .toc-summary {
+    display: none;
+  }
+
+  .toc-nav {
+    max-height: calc(100vh - var(--header-h) - var(--space-5xl));
+    overflow-y: auto;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 1px solid var(--hairline);
+  }
+
+  .toc-item {
+    margin: 0;
+  }
+
+  .toc-link {
+    display: block;
+    padding: 0.3rem 0 0.3rem 0.9rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  .toc-link:hover {
+    color: var(--text-main);
+  }
+
+  .toc-link.is-current {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  .toc-depth-3 .toc-link {
+    padding-left: 1.7rem;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 1199px) {
+    .toc {
+      position: static;
+      /* DOM 中目录位于正文之后（桌面端靠 grid 落到右栏）。
+         窄屏改为折叠摘要，只有置顶才能在阅读前当导航用，否则形同虚设 */
+      order: -1;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .toc-summary {
+      display: block;
+      padding: 0.6rem 0;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .toc-details[open] .toc-summary {
+      border-bottom-color: transparent;
+    }
+
+    .toc-details[open] .toc-nav {
+      padding: var(--space-sm) 0 var(--space-md);
+      border-bottom: 1px solid var(--hairline);
+    }
+  }
+</style>

@@ -24,9 +24,6 @@ const indexLabel =
   <div class="post-entry-body">
     <div class="post-entry-side">
       {indexLabel && <span class="post-entry-index">{indexLabel}</span>}
-      <time datetime={date.toISOString()} class="post-entry-date">
-        {formatDateCN(date)}
-      </time>
     </div>
 
     <div class="post-entry-main">
@@ -34,6 +31,10 @@ const indexLabel =
         <a href={`/archive?category=${encodeURIComponent(category)}`} class="post-entry-category">
           {category}
         </a>
+        <span class="post-entry-sep" aria-hidden="true">·</span>
+        <time datetime={date.toISOString()} class="post-entry-date">
+          {formatDateCN(date)}
+        </time>
         {post.data.pinned && <span class="post-entry-pinned">置顶</span>}
       </div>
       <h2 class="post-entry-title">
@@ -72,9 +73,14 @@ const indexLabel =
 
   .post-entry-body {
     display: grid;
-    grid-template-columns: 128px 1fr;
+    grid-template-columns: 64px 1fr;
     gap: var(--space-2xl);
     padding: var(--space-3xl) var(--space-sm);
+  }
+
+  /* 阅读列宽度上限：宽容器页（归档/标签）下标题不会被拉成长行 */
+  .post-entry-main {
+    max-width: var(--prose-max);
   }
 
   .post-entry-side {
@@ -99,7 +105,7 @@ const indexLabel =
 
   .post-entry-date {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     letter-spacing: 0.04em;
     color: var(--text-muted);
   }
@@ -107,8 +113,14 @@ const indexLabel =
   .post-entry-meta {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
+    flex-wrap: wrap;
+    gap: var(--space-sm);
     margin-bottom: var(--space-sm);
+  }
+
+  .post-entry-sep {
+    color: var(--text-muted);
+    opacity: 0.6;
   }
 
   .post-entry-category {

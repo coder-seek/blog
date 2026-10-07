@@ -13,55 +13,20 @@ const sorted = moments.sort(
 
 <BaseLayout title="动态">
   <Header />
-  <main class="page-content">
-    <section class="page-section">
-      <div class="container">
-        <div class="page-card card">
-          <h1 class="page-title">动态</h1>
-          <p class="page-desc">日常碎碎念，随手记录</p>
-          <div class="moments-list">
-            {sorted.map((moment) => (
-              <MomentItem moment={moment} />
-            ))}
-          </div>
-          {sorted.length === 0 && (
-            <p class="empty-hint">暂无动态</p>
-          )}
-        </div>
+  <main class="page-shell">
+    <div class="container">
+      <h1 class="page-title">动态</h1>
+      <p class="page-lede">日常碎碎念，随手记录 —— 共 {sorted.length} 条。</p>
+      <div class="moments-list">
+        {sorted.map((moment) => <MomentItem moment={moment} />)}
       </div>
-    </section>
+      {sorted.length === 0 && <p class="empty-hint">暂无动态</p>}
+    </div>
   </main>
   <Footer />
 </BaseLayout>
 
 <style>
-  .page-content {
-    padding-top: 72px;
-  }
-
-  .page-section {
-    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
-  }
-
-  .page-card {
-    padding: var(--space-2xl);
-  }
-
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: var(--space-xs);
-  }
-
-  .page-desc {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-lg);
-    border-bottom: 1px solid var(--border);
-  }
-
   .empty-hint {
     text-align: center;
     color: var(--text-muted);

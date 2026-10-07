@@ -25,33 +25,22 @@ const sorted = posts.sort(
 
 <BaseLayout title={`标签：${tag}`}>
   <Header />
-  <main>
-    <section class="page-section">
-      <div class="container">
-        <h1 class="page-title">标签：{tag}</h1>
-        <p class="count-hint">{sorted.length} 篇文章</p>
-        {sorted.map((post) => (
-          <PostCard post={post} layout="list" />
-        ))}
-      </div>
-    </section>
+  <main class="page-shell">
+    <div class="container-wide">
+      <h1 class="page-title">标签：{tag}</h1>
+      <p class="page-lede">
+        {sorted.length} 篇文章
+        <a href="/tags" class="back-to-tags">全部标签</a>
+      </p>
+      {sorted.map((post) => <PostCard post={post} layout="list" />)}
+    </div>
   </main>
   <Footer />
 </BaseLayout>
 
 <style>
-  .page-section {
-    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
-  }
-
-  .page-title {
-    font-size: 1.75rem;
-    margin-bottom: var(--space-xs);
-  }
-
-  .count-hint {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: var(--space-xl);
+  .back-to-tags {
+    margin-left: var(--space-sm);
+    font-size: 0.85rem;
   }
 </style>

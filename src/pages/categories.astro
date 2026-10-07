@@ -14,12 +14,15 @@ const categories = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
 
 <BaseLayout title="分类">
   <Header />
-  <main class="page-content">
-    <section class="page-section">
-      <div class="container">
-        <h1 class="page-title">分类</h1>
-        <div class="cat-grid">
-          {categories.map(([cat, count]) => (
+  <main class="page-shell">
+    <div class="container-wide">
+      <h1 class="page-title">分类</h1>
+      <p class="page-lede">
+        共 {categories.length} 个分类，{posts.length} 篇文章。
+      </p>
+      <div class="cat-grid">
+        {
+          categories.map(([cat, count]) => (
             <a
               href={`/archive?category=${encodeURIComponent(cat)}`}
               class="cat-card card"
@@ -27,36 +30,19 @@ const categories = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
               <span class="cat-card-name">{cat}</span>
               <span class="cat-card-count">{count} 篇</span>
             </a>
-          ))}
-        </div>
-        {categories.length === 0 && (
-          <p class="empty-hint">暂无分类</p>
-        )}
+          ))
+        }
       </div>
-    </section>
+      {categories.length === 0 && <p class="empty-hint">暂无分类</p>}
+    </div>
   </main>
   <Footer />
 </BaseLayout>
 
 <style>
-  .page-content {
-    padding-top: 72px;
-  }
-
-  .page-section {
-    padding: var(--space-3xl) var(--page-x-padding) var(--space-5xl);
-  }
-
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: var(--space-xl);
-  }
-
   .cat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: var(--space-lg);
   }
 

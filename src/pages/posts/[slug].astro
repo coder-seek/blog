@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import CommentSection from "../../components/CommentSection.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
 import { formatDateCN, readingTime } from "../../utils/date";
 
 export async function getStaticPaths() {
@@ -24,23 +25,19 @@ export async function getStaticPaths() {
 
 const { post, prev, next } = Astro.props;
 const { title, date, updated, category, tags, cover } = post.data;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
 const wordCount = readingTime(post.body || "");
 const slug = post.id.replace(/\.md$/, "");
 ---
 
 <BaseLayout title={title} description={post.data.summary} ogImage={cover}>
-  <!-- 阅读进度条 -->
-  <div id="readingProgress" class="reading-progress" aria-hidden="true"></div>
-
   <Header />
 
   <main class="post-page">
     <article class="post-article">
-      <!-- ========== 文章头部 ========== -->
-      <header class="post-header">
-        <div class="post-header-bg" aria-hidden="true"></div>
-        <div class="post-header-content">
+      <div class="post-main">
+        <!-- ========== 文章头部 ========== -->
+        <header class="post-header">
           <div class="post-meta-top">
             <a
               href={`/archive?category=${encodeURIComponent(category)}`}
@@ -48,10 +45,12 @@ const slug = post.id.replace(/\.md$/, "");
             >
               {category}
             </a>
-            <span class="post-date-badge">
-              <time datetime={date.toISOString()}>{formatDateCN(date)}</time>
-            </span>
-            <span class="post-reading-badge">{wordCount} 分钟 · {post.body?.length ?? 0} 字</span>
+            <span class="post-meta-sep" aria-hidden="true">·</span>
+            <time datetime={date.toISOString()} class="post-date">
+              {formatDateCN(date)}
+            </time>
+            <span class="post-meta-sep" aria-hidden="true">·</span>
+            <span class="post-reading">{wordCount} 分钟阅读</span>
           </div>
 
           <h1 class="post-title">{title}</h1>
@@ -59,18 +58,16 @@ const slug = post.id.replace(/\.md$/, "");
           {tags.length > 0 && (
             <div class="post-tags">
               {tags.map((tag) => (
-                <a href={`/tags/${encodeURIComponent(tag)}`} class="tag-chip"
-                  >#{tag}</a
-                >
+                <a href={`/tags/${encodeURIComponent(tag)}`} class="tag-chip">
+                  #{tag}
+                </a>
               ))}
             </div>
           )}
-        </div>
-      </header>
+        </header>
 
-      <!-- ========== 封面图 ========== -->
-      {cover && (
-        <div class="post-cover-wrapper">
+        <!-- ========== 封面图 ========== -->
+        {cover && (
           <div class="post-cover">
             <img
               src={cover}
@@ -81,73 +78,75 @@ const slug = post.id.replace(/\.md$/, "");
               height="630"
             />
           </div>
-        </div>
-      )}
+        )}
 
-      <!-- ========== 文章正文 ========== -->
-      <div class="post-content card">
-        <div class="post-content-inner">
-          <Content />
-        </div>
-      </div>
-
-      <!-- ========== 文章尾部信息 ========== -->
-      <footer class="post-footer card">
-        <div class="post-footer-inner">
-          {updated && (
-            <p class="post-updated">
-              <span class="post-footer-icon">📝</span> 最后更新于
-              {formatDateCN(updated)}
-            </p>
-          )}
-          <div class="post-license">
-            <span class="post-footer-icon">©</span> 本作品采用
-            <a
-              href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-              target="_blank"
-              rel="noopener"
-            >
-              CC BY-NC-SA 4.0
-            </a>
-            许可协议
+        <!-- ========== 文章正文 ========== -->
+        <div class="post-content">
+          <div class="post-content-inner">
+            <Content />
           </div>
         </div>
-      </footer>
 
-      <!-- ========== 上下篇导航 ========== -->
-      <nav class="post-nav" aria-label="文章导航">
-        {prev ? (
-          <a
-            href={`/posts/${prev.id.replace(/\.md$/, "")}`}
-            class="post-nav-link post-nav-prev"
-          >
-            <span class="post-nav-arrow">←</span>
-            <span class="post-nav-body">
-              <span class="post-nav-label">上一篇</span>
-              <span class="post-nav-title">{prev.data.title}</span>
-            </span>
-          </a>
-        ) : (
-          <div></div>
-        )}
-        {next ? (
-          <a
-            href={`/posts/${next.id.replace(/\.md$/, "")}`}
-            class="post-nav-link post-nav-next"
-          >
-            <span class="post-nav-body">
-              <span class="post-nav-label">下一篇</span>
-              <span class="post-nav-title">{next.data.title}</span>
-            </span>
-            <span class="post-nav-arrow">→</span>
-          </a>
-        ) : (
-          <div></div>
-        )}
-      </nav>
+        <!-- ========== 文章尾部信息 ========== -->
+        <footer class="post-footer card">
+          <div class="post-footer-inner">
+            {updated && (
+              <p class="post-updated">
+                <span class="post-footer-icon">📝</span> 最后更新于
+                {formatDateCN(updated)}
+              </p>
+            )}
+            <div class="post-license">
+              <span class="post-footer-icon">©</span> 本作品采用
+              <a
+                href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                target="_blank"
+                rel="noopener"
+              >
+                CC BY-NC-SA 4.0
+              </a>
+              许可协议
+            </div>
+          </div>
+        </footer>
 
-      <!-- ========== 评论区 ========== -->
-      <CommentSection slug={slug} title={title} />
+        <!-- ========== 上下篇导航 ========== -->
+        <nav class="post-nav" aria-label="文章导航">
+          {prev ? (
+            <a
+              href={`/posts/${prev.id.replace(/\.md$/, "")}`}
+              class="post-nav-link post-nav-prev"
+            >
+              <span class="post-nav-arrow">←</span>
+              <span class="post-nav-body">
+                <span class="post-nav-label">上一篇</span>
+                <span class="post-nav-title">{prev.data.title}</span>
+              </span>
+            </a>
+          ) : (
+            <div></div>
+          )}
+          {next ? (
+            <a
+              href={`/posts/${next.id.replace(/\.md$/, "")}`}
+              class="post-nav-link post-nav-next"
+            >
+              <span class="post-nav-body">
+                <span class="post-nav-label">下一篇</span>
+                <span class="post-nav-title">{next.data.title}</span>
+              </span>
+              <span class="post-nav-arrow">→</span>
+            </a>
+          ) : (
+            <div></div>
+          )}
+        </nav>
+
+        <!-- ========== 评论区 ========== -->
+        <CommentSection slug={slug} title={title} />
+      </div>
+
+      <TableOfContents headings={headings} />
     </article>
   </main>
 
@@ -168,31 +167,7 @@ const slug = post.id.replace(/\.md$/, "");
 </BaseLayout>
 
 <script>
-  // 阅读进度条
-  const progressBar = document.getElementById("readingProgress");
-  if (progressBar) {
-    let ticking = false;
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            const scrollTop = window.scrollY;
-            const docHeight =
-              document.documentElement.scrollHeight - window.innerHeight;
-            const progress =
-              docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-            progressBar.style.width = progress + "%";
-            ticking = false;
-          });
-          ticking = true;
-        }
-      },
-      { passive: true },
-    );
-  }
-
-  // 回到顶部
+  // 回到顶部（阅读进度条由 BaseLayout 统一提供）
   const backToTop = document.getElementById("backToTop");
   if (backToTop) {
     let btnTicking = false;
@@ -217,70 +192,49 @@ const slug = post.id.replace(/\.md$/, "");
 </script>
 
 <style>
-  /* ========== 阅读进度条 ========== */
-  .reading-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 3px;
-    background: linear-gradient(
-      90deg,
-      var(--accent),
-      oklch(0.7 0.18 290 / 0.8)
-    );
-    z-index: 100;
-    width: 0;
-    transition: width 0.05s linear;
-    pointer-events: none;
-    box-shadow: 0 0 6px oklch(0.6 0.14 250 / 0.4);
-  }
-
   /* ========== 页面布局 ========== */
   .post-page {
-    padding-top: calc(72px + var(--space-2xl));
+    padding-top: calc(var(--header-h) + var(--space-2xl));
     padding-bottom: var(--space-5xl);
   }
 
+  /* 两栏：正文列 688px（约 41 字/行），目录列 240px；<1200px 收成单栏 */
   .post-article {
-    max-width: 760px;
+    display: grid;
+    grid-template-columns: minmax(0, var(--prose-width)) var(--toc-width);
+    gap: var(--toc-gap);
+    justify-content: center;
+    align-items: start;
+    max-width: calc(
+      var(--prose-width) + var(--toc-width) + var(--toc-gap) + 2 *
+        var(--page-x-padding)
+    );
     margin: 0 auto;
     padding: 0 var(--page-x-padding);
   }
 
-  /* ========== 文章头部 ========== */
+  .post-main {
+    min-width: 0;
+  }
+
+  /* ========== 文章头部 — 左对齐，元信息在标题之上 ========== */
   .post-header {
-    position: relative;
-    text-align: center;
-    padding: var(--space-4xl) 0 var(--space-3xl);
-    margin-bottom: var(--space-xl);
-  }
-
-  .post-header-bg {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      ellipse at 50% 0%,
-      var(--accent-soft) 0%,
-      transparent 70%
-    );
-    opacity: 0.6;
-    pointer-events: none;
-    border-radius: var(--radius-2xl);
-  }
-
-  .post-header-content {
-    position: relative;
-    z-index: 1;
+    padding: var(--space-4xl) 0 var(--space-2xl);
+    margin-bottom: var(--space-md);
   }
 
   .post-meta-top {
     display: flex;
     align-items: center;
-    justify-content: center;
     flex-wrap: wrap;
     gap: var(--space-sm);
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-lg);
     font-size: 0.85rem;
+  }
+
+  .post-meta-sep {
+    color: var(--text-muted);
+    opacity: 0.6;
   }
 
   .post-category-badge {
@@ -300,27 +254,16 @@ const slug = post.id.replace(/\.md$/, "");
     color: #fff;
   }
 
-  .post-date-badge,
-  .post-reading-badge {
+  .post-date,
+  .post-reading {
     color: var(--text-muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .post-date-badge::before,
-  .post-reading-badge::before {
-    content: "·";
-    margin-right: 4px;
-    font-weight: 700;
-    color: var(--border);
   }
 
   .post-title {
     font-family: var(--font-serif);
     font-size: 2.2rem;
     line-height: 1.3;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
     color: var(--text-main);
     font-weight: 800;
     letter-spacing: 0.01em;
@@ -329,7 +272,6 @@ const slug = post.id.replace(/\.md$/, "");
   .post-tags {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: var(--space-xs);
   }
 
@@ -350,11 +292,8 @@ const slug = post.id.replace(/\.md$/, "");
   }
 
   /* ========== 封面图 ========== */
-  .post-cover-wrapper {
-    margin-bottom: var(--space-2xl);
-  }
-
   .post-cover {
+    margin-bottom: var(--space-2xl);
     border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow: var(--shadow-md);
@@ -372,14 +311,13 @@ const slug = post.id.replace(/\.md$/, "");
     display: block;
   }
 
-  /* ========== 文章正文卡片 ========== */
+  /* ========== 文章正文 — 去卡片外壳，行宽由网格列决定 ========== */
   .post-content {
     margin-bottom: var(--space-2xl);
-    overflow: hidden;
   }
 
   .post-content-inner {
-    padding: var(--space-3xl) var(--space-3xl);
+    padding: 0;
   }
 
   /* 正文排版 */
@@ -726,9 +664,16 @@ const slug = post.id.replace(/\.md$/, "");
   }
 
   /* ========== 响应式 ========== */
+  @media (max-width: 1199px) {
+    .post-article {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+  }
+
   @media (max-width: 768px) {
     .post-page {
-      padding-top: calc(72px + var(--space-md));
+      padding-top: calc(var(--header-h) + var(--space-md));
     }
 
     .post-header {
@@ -740,7 +685,6 @@ const slug = post.id.replace(/\.md$/, "");
     }
 
     .post-content-inner {
-      padding: var(--space-xl);
       font-size: 1rem;
     }
 
@@ -767,10 +711,6 @@ const slug = post.id.replace(/\.md$/, "");
   @media (max-width: 480px) {
     .post-title {
       font-size: 1.35rem;
-    }
-
-    .post-content-inner {
-      padding: var(--space-lg);
     }
   }
 </style>

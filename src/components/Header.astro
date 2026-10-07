@@ -7,9 +7,6 @@ const navItems: { href: string; label: string }[] = [
   { href: "/categories", label: "分类" },
   { href: "/tags", label: "标签" },
   { href: "/moments", label: "动态" },
-  { href: "/gallery", label: "摄影" },
-  { href: "/friends", label: "友链" },
-  { href: "/guestbook", label: "留言" },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -108,7 +105,7 @@ const isActive = (href: string) =>
     top: 0;
     left: 0;
     right: 0;
-    z-index: 100;
+    z-index: var(--z-header);
     transition:
       transform 0.5s var(--ease-expo),
       background 0.4s var(--ease-out),

@@ -5,10 +5,6 @@ const socialLinks = [
   { icon: "rss", href: "/rss.xml", label: "RSS" },
 ];
 
-const marqueeWords = [
-  "技术笔记", "Notes", "生活随笔", "Essays", "读书记录", "Reading",
-  "摄影", "Photography", "拾光记", "Journal",
-];
 ---
 
 <section class="hero">
@@ -71,22 +67,6 @@ const marqueeWords = [
       </div>
     </div>
   </div>
-
-  <!-- 走马灯分隔带 -->
-  <div class="hero-marquee" aria-hidden="true">
-    <div class="marquee-track">
-      {[0, 1].map(() => (
-        <span class="marquee-group">
-          {marqueeWords.map((w) => (
-            <span class="marquee-item">
-              {w}
-              <span class="marquee-dot">·</span>
-            </span>
-          ))}
-        </span>
-      ))}
-    </div>
-  </div>
 </section>
 
 <style>
@@ -95,7 +75,7 @@ const marqueeWords = [
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: min(88vh, 860px);
+    min-height: min(52vh, 460px);
     padding-top: var(--header-h);
     overflow: hidden;
   }
@@ -150,7 +130,7 @@ const marqueeWords = [
   /* 戏剧性大字标 — 逐字升场 */
   .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(4.5rem, 16vw, 12.5rem);
+    font-size: clamp(2.75rem, 8vw, 5.5rem);
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: 0.04em;
@@ -284,63 +264,13 @@ const marqueeWords = [
     transform: translateY(-3px);
   }
 
-  /* 走马灯分隔带 */
-  .hero-marquee {
-    position: relative;
-    z-index: 1;
-    border-top: 1px solid var(--hairline);
-    border-bottom: 1px solid var(--hairline);
-    padding: 0.85rem 0;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 8%,
-      #000 92%,
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 8%,
-      #000 92%,
-      transparent
-    );
-  }
-
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marqueeScroll 36s linear infinite;
-  }
-
-  .hero-marquee:hover .marquee-track {
-    animation-play-state: paused;
-  }
-
-  .marquee-group {
-    display: flex;
-  }
-
-  .marquee-item {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-display);
-    font-size: 0.88rem;
-    font-weight: 400;
-    letter-spacing: 0.18em;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-
-  .marquee-dot {
-    margin: 0 1.4rem;
-    color: var(--accent);
-  }
-
   @media (max-width: 768px) {
     .hero {
-      min-height: 78vh;
+      min-height: auto;
+    }
+
+    .hero-frame {
+      padding-bottom: var(--space-2xl);
     }
 
     .hero-meta {
