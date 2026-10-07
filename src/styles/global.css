@@ -126,6 +126,9 @@
   --btn-bg: oklch(0.3 0.018 70);
   --overlay: oklch(0 0 0 / 0.65);
   --grain-opacity: 0.5;
+  /* 原生 UI 同步切到深色，避免暗色页面里出现白底滚动条/白底下拉标记。
+     注意这条也影响系统色 Canvas/CanvasText，下面的高对比度覆盖跟着走即可 */
+  color-scheme: dark;
 }
 
 /* ========== Reset & Base ========== */
@@ -141,6 +144,10 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* 让原生 UI（根画布、滚动条、details 标记、表单控件）跟随当前主题。
+     站点用 data-theme 手动切换而非 prefers-color-scheme，所以这里按亮色打底，
+     深色由 [data-theme="dark"] 覆盖（属性选择器特异性更高） */
+  color-scheme: light;
   /* 标准滚动条 API。macOS 的原生 overlay 滚动条默认忽略自定义颜色，
      必须同时给出 scrollbar-width 才会渲染；scrollbar-gutter 避免内容因滚动条出现而横向跳动 */
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);

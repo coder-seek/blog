@@ -19,6 +19,9 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 声明两种配色都支持：浏览器据此在选择 data-theme 之前就先按正确的
+         配色绘制根画布，暗色用户不会再看到一闪的白底 -->
+    <meta name="color-scheme" content="light dark" />
     <title>{title ? `${title} - 拾光记` : "拾光记"}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

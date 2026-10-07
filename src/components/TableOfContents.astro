@@ -52,43 +52,103 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
   tocMq.addEventListener("change", syncTocOpen);
 
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".toc-link"));
-  const targets = links
-    .map((link) => {
-      const id = link.getAttribute("href")?.slice(1);
-      return id ? document.getElementById(id) : null;
-    })
-    .filter((el): el is HTMLElement => el !== null);
+  const nav = document.querySelector<HTMLElement>(".toc-nav");
 
-  if (targets.length > 0) {
-    const HEADER_OFFSET = 120;
-    let ticking = false;
+  // ===== 目录溢出状态：只有真的可滚动时才给底边渐隐 =====
+  const syncOverflowState = () => {
+    if (!nav) return;
+    const scrollable = nav.scrollHeight - nav.clientHeight > 2;
+    const atEnd = nav.scrollTop + nav.clientHeight >= nav.scrollHeight - 2;
+    nav.classList.toggle("is-scrollable", scrollable);
+    nav.classList.toggle("is-at-end", atEnd);
+  };
 
-    const setCurrent = () => {
-      let current = -1;
-      targets.forEach((el, i) => {
-        if (el.getBoundingClientRect().top <= HEADER_OFFSET) current = i;
-      });
-      links.forEach((link, i) => {
-        const active = i === current;
-        link.classList.toggle("is-current", active);
-        if (active) link.setAttribute("aria-current", "location");
-        else link.removeAttribute("aria-current");
-      });
-      ticking = false;
+  if (nav) {
+    nav.addEventListener("scroll", syncOverflowState, { passive: true });
+    window.addEventListener("resize", syncOverflowState, { passive: true });
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(syncOverflowState).observe(nav);
+    }
+    syncOverflowState();
+  }
+
+  // ===== 当前小节高亮 =====
+  const setAriaCurrent = (index: number) => {
+    links.forEach((link, i) => {
+      if (i === index) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  };
+
+  // 原生方案优先：scroll-target-group + :target-current 直接由浏览器驱动，
+  // 不需要任何滚动回调。命中时高亮完全交给 CSS，这里只把状态同步给读屏
+  // （:target-current 本身不暴露给辅助技术）
+  const nativeScrollspy =
+    CSS.supports("scroll-target-group: auto") &&
+    CSS.supports("selector(:target-current)");
+
+  if (nativeScrollspy) {
+    const syncFromNative = () => {
+      setAriaCurrent(links.findIndex((link) => link.matches(":target-current")));
     };
-
+    // scrollend 触发时浏览器自己的“当前目标”可能还没落定（实测会读到上一段的
+    // 结果），延后两帧再读，保证 aria 和视觉高亮指的是同一条
+    const scheduleSyncFromNative = () => {
+      requestAnimationFrame(() => requestAnimationFrame(syncFromNative));
+    };
+    let settleTimer = 0;
+    syncFromNative();
+    document.addEventListener("scrollend", scheduleSyncFromNative);
+    // scrollend 对「瞬时」滚动不触发（实测：脚本 scrollTo、锚点跳转都不发），
+    // 而 prefers-reduced-motion 下全局 scroll-behavior 就是 auto，正好落在这个盲区。
+    // 所以补一个防抖兜底：只挂 passive 监听、滚动期间不做任何布局读取，
+    // 停止 150ms 后才同步一次 aria，保证最终一定与视觉一致
     window.addEventListener(
       "scroll",
       () => {
-        if (!ticking) {
-          ticking = true;
-          requestAnimationFrame(setCurrent);
-        }
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(scheduleSyncFromNative, 150);
       },
       { passive: true },
     );
+  } else {
+    // 兜底：自己算「最后一条越过阅读线的标题」，行为与改造前一致
+    const targets = links
+      .map((link) => {
+        const id = link.getAttribute("href")?.slice(1);
+        return id ? document.getElementById(id) : null;
+      })
+      .filter((el): el is HTMLElement => el !== null);
 
-    setCurrent();
+    if (targets.length > 0) {
+      const HEADER_OFFSET = 120;
+      let ticking = false;
+
+      const setCurrent = () => {
+        let current = -1;
+        targets.forEach((el, i) => {
+          if (el.getBoundingClientRect().top <= HEADER_OFFSET) current = i;
+        });
+        links.forEach((link, i) => {
+          link.classList.toggle("is-current", i === current);
+        });
+        setAriaCurrent(current);
+        ticking = false;
+      };
+
+      window.addEventListener(
+        "scroll",
+        () => {
+          if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(setCurrent);
+          }
+        },
+        { passive: true },
+      );
+
+      setCurrent();
+    }
   }
 </script>
 
@@ -106,6 +166,25 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
   .toc-nav {
     max-height: calc(100vh - var(--header-h) - var(--space-5xl));
     overflow-y: auto;
+    /* 原生滚动位置追踪：把这一组锚点交给浏览器判断“当前小节”，
+       配合下面的 :target-current 使用。仅 Chromium 140+ 支持，其余浏览器忽略 */
+    scroll-target-group: auto;
+  }
+
+  /* 列表溢出时给底边做渐隐，暗示下面还有条目。
+     只在真的可滚动、且还没滚到底时生效，否则会把最后一条平白淡掉。
+     用 mask 而不是半透明遮罩：背景能自然透出，也不挡选中和点击 */
+  .toc-nav.is-scrollable:not(.is-at-end) {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
   }
 
   .toc-list {
@@ -134,9 +213,14 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     color: var(--text-main);
   }
 
-  .toc-link.is-current {
+  /* 原生 :target-current 与脚本兜底的 .is-current 用 :is() 合并。
+     必须走 :is()：写成 ".toc-link.is-current, .toc-link:target-current" 的话，
+     不认识该伪类的浏览器会把整条规则判为无效，兜底态会一起失效 */
+  .toc-link:is(.is-current, :target-current) {
     color: var(--accent);
     border-left-color: var(--accent);
+    /* 颜色之外补一个非色彩线索，色觉障碍用户也能看出当前项 */
+    font-weight: 600;
   }
 
   .toc-depth-3 .toc-link {
